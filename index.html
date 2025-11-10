@@ -9,16 +9,17 @@
 <body>
   <a-scene background="color: #001028" vr-mode-ui="enabled: true" renderer="antialias: true">
 
-
     <a-entity id="rig" position="0 0 0">
       <a-entity id="camera" camera look-controls position="0 1.6 0"></a-entity>
 
       <a-entity teleport-controls="cameraRig: #rig; teleportOrigin: #camera; collisionEntities: .ground; button: trigger; type: blink"></a-entity>
+
+      <a-entity laser-controls="hand: left" raycaster="objects: .ground"></a-entity>
+      <a-entity laser-controls="hand: right" raycaster="objects: .ground"></a-entity>
     </a-entity>
 
     <a-plane class="ground" rotation="-90 0 0" width="20" height="20" color="#228B22"></a-plane>
 
-  
     <a-box class="ground" position="3 0.5 -5" depth="2" height="1" width="2" color="#8B0000"></a-box>
     <a-box class="ground" position="-3 1 -8" depth="3" height="2" width="2" color="#FFA500"></a-box>
     <a-box class="ground" position="0 0.5 -12" depth="4" height="1" width="2" color="#00008B"></a-box>
@@ -26,7 +27,7 @@
     <a-box class="ground" position="-5 0.5 -18" depth="2" height="1" width="2" color="#FF4500"></a-box>
     <a-box class="ground" position="5 2 -6" depth="1" height="1" width="1" color="#8B0000"></a-box>
     <a-box class="ground" position="8 4 -7" depth="2" height="1" width="1" color="#FFA500"></a-box>
-    <a-box class="ground" position="-7 7-14" depth="2" height="1" width="2" color="#00008B"></a-box>
+    <a-box class="ground" position="-7 7 -14" depth="2" height="1" width="2" color="#00008B"></a-box>
     <a-box class="ground" position="3 9 -10" depth="3" height="3" width="3" color="#800080"></a-box>
     <a-box class="ground" position="-2 12 -2" depth="2" height="1" width="2" color="#FF4500"></a-box>
     <a-box class="ground" position="3 2 9" depth="1" height="1" width="1" color="#8B0000"></a-box>
@@ -38,7 +39,6 @@
     <a-entity light="type: ambient; intensity: 0.5"></a-entity>
     <a-entity light="type: directional; intensity: 0.8" position="5 10 5"></a-entity>
 
-
     <a-entity cursor="rayOrigin: mouse"
               raycaster="objects: .ground"
               geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
@@ -46,21 +46,21 @@
               position="0 0 -1">
     </a-entity>
 
-   
     <script>
       const rig = document.querySelector('#rig');
-      const cameraHeight = 1.6; 
+      const cameraHeight = 1.6;
 
       document.querySelectorAll('.ground').forEach(el => {
-        el.addEventListener('click', (e) => {
+        el.addEventListener('click', e => {
           const point = e.detail.intersection.point;
+          rig.setAttribute('position', { x: point.x, y: point.y + cameraHeight, z: point.z });
+        });
 
-          
-          rig.setAttribute('position', {
-            x: point.x,
-            y: point.y + cameraHeight,
-            z: point.z
-          });
+        el.addEventListener('triggerdown', e => {
+          const intersection = e.detail.intersection || e.detail.intersectedEl.components.raycaster.getIntersection(el);
+          if (!intersection) return;
+          const point = intersection.point || el.object3D.position;
+          rig.setAttribute('position', { x: point.x, y: point.y + cameraHeight, z: point.z });
         });
       });
     </script>
@@ -68,4 +68,3 @@
   </a-scene>
 </body>
 </html>
-
